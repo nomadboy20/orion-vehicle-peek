@@ -36,7 +36,7 @@ serve(async (req) => {
     
     console.log('🎯 Using groupCode:', groupCode);
     
-    const apiUrl = `https://a1.gpsguard.eu/api/v1/vehicles/group/${groupCode}`;
+    const apiUrl = `https://a2.gpsguard.eu/api/v1/vehicles/group/${groupCode}`;
     const username = "api_gpsdozor";
     const password = "yakmwlARdn";
     
