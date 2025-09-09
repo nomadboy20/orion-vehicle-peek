@@ -34,7 +34,6 @@ class GPSService {
     return {
       'Authorization': `Basic ${credentials}`,
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
     };
   }
 
@@ -43,7 +42,6 @@ class GPSService {
       const response = await fetch(`${API_BASE_URL}/vehicles/group/${groupCode}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
-        mode: 'cors',
       });
 
       if (!response.ok) {
