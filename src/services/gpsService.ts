@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://a1.gpsguard.eu/api/v1';
+const API_BASE_URL = 'https://cors-anywhere.herokuapp.com/https://a1.gpsguard.eu/api/v1';
 
 // Demo credentials from API documentation
 const API_CREDENTIALS = {
