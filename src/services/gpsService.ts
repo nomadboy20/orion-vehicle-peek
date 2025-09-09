@@ -1,10 +1,5 @@
-const API_BASE_URL = 'https://a1.gpsguard.eu/api/v1';
-
-// Demo credentials from API documentation
-const API_CREDENTIALS = {
-  username: 'api_gpsdozor',
-  password: 'yakmwlARdn'
-};
+// Use Supabase edge function as proxy to avoid CORS issues
+const API_BASE_URL = '/functions/v1/gps-vehicles';
 
 interface Vehicle {
   Code: string;
@@ -29,19 +24,13 @@ interface Vehicle {
 }
 
 class GPSService {
-  private getAuthHeaders() {
-    const credentials = btoa(`${API_CREDENTIALS.username}:${API_CREDENTIALS.password}`);
-    return {
-      'Authorization': `Basic ${credentials}`,
-      'Content-Type': 'application/json',
-    };
-  }
-
   async getVehiclesByGroup(groupCode: string = 'SAGU'): Promise<Vehicle[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/vehicles/group/${groupCode}`, {
+      const response = await fetch(`${API_BASE_URL}?groupCode=${groupCode}`, {
         method: 'GET',
-        headers: this.getAuthHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) {
