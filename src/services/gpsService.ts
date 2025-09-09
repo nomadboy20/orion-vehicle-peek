@@ -1,11 +1,4 @@
-// Fallback to direct API call for debugging (will have CORS issues)
-const API_BASE_URL = 'https://a1.gpsguard.eu/api/v1';
-
-// Demo credentials from API documentation
-const API_CREDENTIALS = {
-  username: 'api_gpsdozor',
-  password: 'yakmwlARdn'
-};
+import { supabase } from '@/integrations/supabase/client';
 
 interface Vehicle {
   Code: string;
@@ -30,46 +23,24 @@ interface Vehicle {
 }
 
 class GPSService {
-  private getAuthHeaders() {
-    const credentials = btoa(`${API_CREDENTIALS.username}:${API_CREDENTIALS.password}`);
-    console.log('🔐 Auth credentials prepared:', API_CREDENTIALS.username);
-    return {
-      'Authorization': `Basic ${credentials}`,
-      'Content-Type': 'application/json',
-    };
-  }
-
   async getVehiclesByGroup(groupCode: string = 'SAGU'): Promise<Vehicle[]> {
-    const url = `${API_BASE_URL}/vehicles/group/${groupCode}`;
-    console.log('🚀 Starting API call to:', url);
-    console.log('📡 Group code:', groupCode);
+    console.log('🚀 Calling Supabase edge function for group:', groupCode);
     
     try {
-      const headers = this.getAuthHeaders();
-      console.log('📋 Request headers:', headers);
-      
-      console.log('⏳ Making fetch request...');
-      const response = await fetch(url, {
-        method: 'GET',
-        headers,
-        mode: 'cors',
+      const { data, error } = await supabase.functions.invoke('gps-vehicles', {
+        body: { groupCode }
       });
 
-      console.log('📡 Response received:', {
-        ok: response.ok,
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries())
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ API Error Response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      if (error) {
+        console.error('❌ Supabase function error:', error);
+        throw new Error(`Function error: ${error.message}`);
       }
 
-      const data = await response.json();
-      console.log('✅ Data received:', data);
+      if (!data) {
+        throw new Error('No data returned from function');
+      }
+
+      console.log('✅ Data received from edge function:', data);
       console.log('📊 Number of vehicles:', Array.isArray(data) ? data.length : 'Not an array');
       
       return data;
@@ -77,13 +48,8 @@ class GPSService {
       console.error('💥 Detailed error:', {
         name: error.name,
         message: error.message,
-        stack: error.stack,
-        url: url
+        stack: error.stack
       });
-      
-      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        console.error('🚫 CORS Error detected - need backend proxy or Supabase edge function');
-      }
       
       throw new Error(`Nepodařilo se načíst vozidla: ${error.message}`);
     }
