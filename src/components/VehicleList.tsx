@@ -51,7 +51,7 @@ export function VehicleList() {
     try {
       const apiUrl = 'https://a2.gpsguard.eu/api/v1/vehicles/group/SAGU';
       const username = "api_gpsdozor";
-      const password = "StpH2#aB";
+      const password = "yakmwlARdn";
       const auth = btoa(`${username}:${password}`);
       
       const response = await fetch(apiUrl, {
