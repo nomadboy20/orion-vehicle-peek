@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+
 
 interface Vehicle {
   Code: string;
@@ -24,33 +24,34 @@ interface Vehicle {
 
 class GPSService {
   async getVehiclesByGroup(groupCode: string = 'SAGU'): Promise<Vehicle[]> {
-    console.log('🚀 Calling Supabase edge function for group:', groupCode);
+    console.log('🚀 Calling GPS API directly for group:', groupCode);
     
     try {
-      const { data, error } = await supabase.functions.invoke('gps-vehicles', {
-        body: { groupCode }
+      const apiUrl = `https://a2.gpsguard.eu/api/v1/vehicles/group/${groupCode}`;
+      const username = "api_gpsdozor";
+      const password = "yakmwlARdn";
+      const auth = btoa(`${username}:${password}`);
+
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Accept': 'application/json',
+        },
       });
 
-      if (error) {
-        console.error('❌ Supabase function error:', error);
-        throw new Error(`Function error: ${error.message}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ GPS API Error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
-      if (!data) {
-        throw new Error('No data returned from function');
-      }
-
-      console.log('✅ Data received from edge function:', data);
-      console.log('📊 Number of vehicles:', Array.isArray(data) ? data.length : 'Not an array');
+      const data = await response.json();
+      console.log('✅ GPS API success, vehicles count:', Array.isArray(data) ? data.length : 'not array');
       
       return data;
     } catch (error) {
-      console.error('💥 Detailed error:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
-      
+      console.error('💥 GPS API error:', error);
       throw new Error(`Nepodařilo se načíst vozidla: ${error.message}`);
     }
   }

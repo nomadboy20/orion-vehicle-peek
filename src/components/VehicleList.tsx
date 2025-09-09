@@ -45,51 +45,6 @@ export function VehicleList() {
     }
   };
 
-  const testDirectAPI = async () => {
-    console.log('🧪 Testing direct API call from browser...');
-    
-    try {
-      const apiUrl = 'https://a2.gpsguard.eu/api/v1/vehicles/group/SAGU';
-      const username = "api_gpsdozor";
-      const password = "yakmwlARdn";
-      const auth = btoa(`${username}:${password}`);
-      
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Basic ${auth}`,
-          'Accept': 'application/json',
-        },
-      });
-      
-      console.log('📡 Direct API response status:', response.status);
-      console.log('📡 Direct API response headers:', Object.fromEntries(response.headers.entries()));
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Direct API success:', data);
-        toast({
-          title: "Direct API Test - Úspech!",
-          description: `API je dostupné, počet vozidiel: ${Array.isArray(data) ? data.length : 'N/A'}`,
-        });
-      } else {
-        const errorText = await response.text();
-        console.error('❌ Direct API Error:', errorText);
-        toast({
-          variant: "destructive",
-          title: "Direct API Test - HTTP Error",
-          description: `Status: ${response.status} - ${errorText}`,
-        });
-      }
-    } catch (err) {
-      console.error('💥 Direct API Exception:', err);
-      toast({
-        variant: "destructive", 
-        title: "Direct API Test - Exception",
-        description: err instanceof Error ? err.message : 'Neznáma chyba',
-      });
-    }
-  };
 
   useEffect(() => {
     fetchVehicles();
@@ -138,24 +93,15 @@ export function VehicleList() {
             </div>
           </div>
           
-          <div className="flex gap-2">
-            <Button
-              onClick={() => testDirectAPI()}
-              variant="secondary"
-              className="flex items-center gap-2"
-            >
-              🧪 Test Direct API
-            </Button>
-            <Button
-              onClick={() => fetchVehicles(true)}
-              disabled={refreshing}
-              variant="outline"
-              className="flex items-center gap-2 hover:bg-secondary/80"
-            >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Aktualizovat
-            </Button>
-          </div>
+          <Button
+            onClick={() => fetchVehicles(true)}
+            disabled={refreshing}
+            variant="outline"
+            className="flex items-center gap-2 hover:bg-secondary/80"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Aktualizovat
+          </Button>
         </div>
 
         {vehicles.length === 0 ? (
