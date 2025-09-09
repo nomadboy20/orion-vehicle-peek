@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://cors-anywhere.herokuapp.com/https://a1.gpsguard.eu/api/v1';
+const API_BASE_URL = 'https://a1.gpsguard.eu/api/v1';
 
 // Demo credentials from API documentation
 const API_CREDENTIALS = {
@@ -19,12 +19,13 @@ interface Vehicle {
     Latitude: string;
     Longitude: string;
   };
-  LastPing: string;
-}
-
-interface Group {
-  Code: string;
-  Name: string;
+  LastPositionTimestamp: string;
+  DeviceImei: string;
+  IsActive: boolean;
+  IsEcoDrivingEnabled: boolean;
+  Odometer: number;
+  IsInvoiced: boolean;
+  RefuelingCards: any[];
 }
 
 class GPSService {
@@ -33,32 +34,16 @@ class GPSService {
     return {
       'Authorization': `Basic ${credentials}`,
       'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
     };
   }
 
-  async getGroups(): Promise<Group[]> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/groups`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching groups:', error);
-      throw new Error('Nepodařilo se načíst skupiny vozidel');
-    }
-  }
-
-  async getVehiclesByGroup(groupCode: string): Promise<Vehicle[]> {
+  async getVehiclesByGroup(groupCode: string = 'SAGU'): Promise<Vehicle[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/vehicles/group/${groupCode}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -73,26 +58,9 @@ class GPSService {
   }
 
   async getAllVehicles(): Promise<Vehicle[]> {
-    try {
-      const groups = await this.getGroups();
-      const allVehicles: Vehicle[] = [];
-
-      for (const group of groups) {
-        try {
-          const vehicles = await this.getVehiclesByGroup(group.Code);
-          allVehicles.push(...vehicles);
-        } catch (error) {
-          console.warn(`Failed to fetch vehicles for group ${group.Code}:`, error);
-        }
-      }
-
-      return allVehicles;
-    } catch (error) {
-      console.error('Error fetching all vehicles:', error);
-      throw new Error('Nepodařilo se načíst vozidla');
-    }
+    return this.getVehiclesByGroup('SAGU');
   }
 }
 
 export const gpsService = new GPSService();
-export type { Vehicle, Group };
+export type { Vehicle };

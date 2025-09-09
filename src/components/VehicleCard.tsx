@@ -15,7 +15,7 @@ interface Vehicle {
     Latitude: string;
     Longitude: string;
   };
-  LastPing: string;
+  LastPositionTimestamp: string;
 }
 
 interface VehicleCardProps {
@@ -90,7 +90,7 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
 
         <div className="pt-2 border-t border-border/50">
           <p className="text-xs text-muted-foreground">
-            Poslední aktualizace: {formatLastSeen(vehicle.LastPing)}
+            Poslední aktualizace: {formatLastSeen(vehicle.LastPositionTimestamp)}
           </p>
           <p className="text-xs text-muted-foreground">
             Pobočka: {vehicle.BranchName}
