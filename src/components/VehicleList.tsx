@@ -23,7 +23,7 @@ export function VehicleList() {
       setError(null);
 
       const vehicleData = await gpsService.getAllVehicles();
-      setVehicles(vehicleData);
+      setVehicles(vehicleData.filter((v) => v?.LastPosition?.Latitude !== undefined && v?.LastPosition?.Longitude !== undefined));
       
       if (isRefresh) {
         toast({
