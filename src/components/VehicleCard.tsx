@@ -3,19 +3,20 @@ import { Badge } from "@/components/ui/badge";
 import { Car, MapPin, Battery, Gauge } from "lucide-react";
 
 interface Vehicle {
-  Code: string;
-  GroupCode: string;
-  BranchId: string;
-  BranchName: string;
-  Name: string;
-  SPZ: string;
-  BatteryPercentage: number;
-  Speed: number;
-  LastPosition: {
-    Latitude: string;
-    Longitude: string;
+  code: string;
+  groupCode: string;
+  branchName?: string;
+  name: string;
+  spz: string;
+  speed: number;
+  batteryPercentage: number;
+  odometer: number;
+  lastPosition: {
+    latitudeE6: number;
+    longitudeE6: number;
   };
-  LastPositionTimestamp: string;
+  lastPositionTimestamp: string;
+  refuelingCards: any[];
 }
 
 interface VehicleCardProps {
@@ -61,13 +62,13 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
             <Car className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-semibold text-lg text-card-foreground">{vehicle.Name}</h3>
-            <p className="text-sm text-muted-foreground font-mono">{vehicle.SPZ}</p>
+            <h3 className="font-semibold text-lg text-card-foreground">{vehicle.name}</h3>
+            <p className="text-sm text-muted-foreground font-mono">{vehicle.spz}</p>
           </div>
         </div>
-        <Badge variant={getSpeedBadgeVariant(vehicle.Speed)} className="flex items-center gap-1">
+        <Badge variant={getSpeedBadgeVariant(vehicle.speed)} className="flex items-center gap-1">
           <Gauge className="w-3 h-3" />
-          {vehicle.Speed} km/h
+          {vehicle.speed} km/h
         </Badge>
       </div>
 
@@ -75,26 +76,28 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
         <div className="flex items-center gap-2 text-sm">
           <MapPin className="w-4 h-4 text-accent" />
           <span className="text-muted-foreground">
-            {parseFloat(vehicle.LastPosition.Latitude).toFixed(4)}, {parseFloat(vehicle.LastPosition.Longitude).toFixed(4)}
+            {(vehicle.lastPosition.latitudeE6 / 1000000).toFixed(4)}, {(vehicle.lastPosition.longitudeE6 / 1000000).toFixed(4)}
           </span>
         </div>
 
-        {vehicle.BatteryPercentage > 0 && (
+        {vehicle.batteryPercentage > 0 && (
           <div className="flex items-center gap-2 text-sm">
-            <Battery className={`w-4 h-4 ${getBatteryColor(vehicle.BatteryPercentage)}`} />
+            <Battery className={`w-4 h-4 ${getBatteryColor(vehicle.batteryPercentage)}`} />
             <span className="text-muted-foreground">
-              Baterie: {vehicle.BatteryPercentage}%
+              Baterie: {vehicle.batteryPercentage}%
             </span>
           </div>
         )}
 
         <div className="pt-2 border-t border-border/50">
           <p className="text-xs text-muted-foreground">
-            Poslední aktualizace: {formatLastSeen(vehicle.LastPositionTimestamp)}
+            Poslední aktualizace: {formatLastSeen(vehicle.lastPositionTimestamp)}
           </p>
-          <p className="text-xs text-muted-foreground">
-            Pobočka: {vehicle.BranchName}
-          </p>
+          {vehicle.branchName && (
+            <p className="text-xs text-muted-foreground">
+              Pobočka: {vehicle.branchName}
+            </p>
+          )}
         </div>
       </div>
     </Card>
