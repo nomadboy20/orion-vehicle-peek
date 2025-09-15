@@ -19,7 +19,7 @@ export function VehicleList() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
-  const { isTokenValid } = useApp();
+  const { isTokenValid, mode } = useApp();
 
   // Filter groups based on search query
   const filteredGroups = useMemo(() => {
@@ -118,9 +118,19 @@ export function VehicleList() {
         <AppHeader />
         <div className="flex items-center justify-center p-6">
           <Card className="p-8 text-center max-w-md mx-auto bg-card/80 backdrop-blur-sm">
-            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-            <h2 className="text-xl font-semibold mb-2 text-card-foreground">Token nie je nastavený</h2>
-            <p className="text-muted-foreground">V dev režime vložte access token hore v hlavičke.</p>
+            {mode === 'production' ? (
+              <>
+                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+                <h2 className="text-xl font-semibold mb-2 text-card-foreground">Čakám na token...</h2>
+                <p className="text-muted-foreground">Očakávam access token z parent okna</p>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+                <h2 className="text-xl font-semibold mb-2 text-card-foreground">Token nie je nastavený</h2>
+                <p className="text-muted-foreground">V dev režime vložte access token hore v hlavičke.</p>
+              </>
+            )}
           </Card>
         </div>
       </div>

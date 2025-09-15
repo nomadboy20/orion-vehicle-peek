@@ -22,16 +22,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return savedToken || defaultToken;
   });
   const [isTokenValid, setIsTokenValid] = useState<boolean>(false);
+  const [receivedFromParent, setReceivedFromParent] = useState<boolean>(false);
 
-  // Update GPS service token when token changes
+  // Update GPS service token when token or mode changes
   useEffect(() => {
     if (token) {
       gpsService.setToken(token);
-      setIsTokenValid(true);
-    } else {
-      setIsTokenValid(false);
     }
-  }, [token]);
+    const valid = mode === 'dev' ? Boolean(token) : Boolean(token && receivedFromParent);
+    setIsTokenValid(valid);
+  }, [token, mode, receivedFromParent]);
 
   // Listen for postMessage in production mode
   useEffect(() => {
@@ -40,6 +40,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (event.data && event.data.access_token) {
           console.log('🔑 Received token from parent:', event.data.access_token);
           setToken(event.data.access_token);
+          setReceivedFromParent(true);
         }
       };
 
@@ -55,8 +56,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem('app_mode', mode);
     if (mode === 'dev') {
+      setReceivedFromParent(true);
       const saved = localStorage.getItem('gps_dev_token');
       if (!token && saved) setToken(saved);
+    } else {
+      setReceivedFromParent(false);
     }
   }, [mode]);
 
@@ -64,6 +68,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setToken(newToken);
     if (mode === 'dev') {
       localStorage.setItem('gps_dev_token', newToken);
+      setReceivedFromParent(true);
     }
   };
 
@@ -71,12 +76,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMode(newMode);
     localStorage.setItem('app_mode', newMode);
     if (newMode === 'production') {
+      setReceivedFromParent(false);
       // Avoid wiping a token received from parent; only clear if it's the dev token
       const savedDev = localStorage.getItem('gps_dev_token');
       if (token && savedDev && token === savedDev) {
         setToken('');
       }
     } else if (newMode === 'dev') {
+      setReceivedFromParent(true);
       const saved = localStorage.getItem('gps_dev_token');
       if (saved) setToken(saved);
     }
