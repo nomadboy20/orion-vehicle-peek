@@ -26,7 +26,8 @@ export function AppHeader() {
     // Check if we're in an iframe and if parent URL contains lovable.dev
     const isInIframe = window !== window.parent;
     let parentContainsLovable = false;
-    
+    console.log('isInIframe',isInIframe)
+    console.log('a',window.parent.location)
     if (isInIframe) {
       try {
         parentContainsLovable = window.parent.location.href.includes('lovable.dev');
