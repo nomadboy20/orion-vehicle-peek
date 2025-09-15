@@ -35,14 +35,20 @@ class GPSService {
 
   async getGroups(): Promise<Group[]> {
     console.log('🚀 Fetching groups from GPS API');
-    
+
+    let controller = new AbortController();
+    let timeoutId: number | undefined;
+
     try {
+      timeoutId = window.setTimeout(() => controller.abort(), 12000);
+
       const response = await fetch("https://api-d.gpsguard.eu/api/v1/groups", {
         method: 'GET',
         headers: {
           'accept': '*/*',
           'Authorization': `Orion ${this.token}`,
         },
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -54,22 +60,34 @@ class GPSService {
       const data = await response.json();
       console.log('✅ Groups API success:', data);
       return Array.isArray(data) ? data : [];
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.name === 'AbortError') {
+        console.error('⏱️ Groups API timeout');
+        throw new Error('Časový limit požiadavky (groups) vypršal');
+      }
       console.error('💥 Groups API error:', error);
-      throw new Error(`Nepodařilo se načíst skupiny: ${error.message}`);
+      throw new Error(`Nepodařilo se načíst skupiny: ${error.message || error}`);
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
     }
   }
 
   async getVehiclesByGroup(groupCode: string): Promise<Vehicle[]> {
     console.log(`🚀 Fetching vehicles for group: ${groupCode}`);
     
+    let controller = new AbortController();
+    let timeoutId: number | undefined;
+
     try {
+      timeoutId = window.setTimeout(() => controller.abort(), 12000);
+
       const response = await fetch(`https://api-d.gpsguard.eu/api/v1/group/${groupCode}`, {
         method: 'GET',
         headers: {
           'accept': '*/*',
           'Authorization': `Orion ${this.token}`,
         },
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -81,9 +99,15 @@ class GPSService {
       const data = await response.json();
       console.log('✅ Vehicles API success:', data);
       return Array.isArray(data) ? data : [];
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.name === 'AbortError') {
+        console.error('⏱️ Vehicles API timeout');
+        throw new Error('Časový limit požiadavky (vehicles) vypršal');
+      }
       console.error('💥 Vehicles API error:', error);
-      throw new Error(`Nepodařilo se načíst vozidla: ${error.message}`);
+      throw new Error(`Nepodařilo se načíst vozidla: ${error.message || error}`);
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
     }
   }
 }

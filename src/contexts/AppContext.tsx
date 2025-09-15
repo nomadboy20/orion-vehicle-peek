@@ -14,7 +14,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<AppMode>('dev');
+  const [mode, setMode] = useState<AppMode>(() => (localStorage.getItem('app_mode') as AppMode) || 'dev');
   const [token, setToken] = useState<string>('');
   const [isTokenValid, setIsTokenValid] = useState<boolean>(false);
 
@@ -46,15 +46,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [mode]);
 
+  // Persist mode and restore dev token when switching back to dev
+  useEffect(() => {
+    localStorage.setItem('app_mode', mode);
+    if (mode === 'dev') {
+      const saved = localStorage.getItem('gps_dev_token');
+      if (!token && saved) setToken(saved);
+    }
+  }, [mode]);
+
   const handleSetToken = (newToken: string) => {
     setToken(newToken);
+    if (mode === 'dev') {
+      localStorage.setItem('gps_dev_token', newToken);
+    }
   };
 
   const handleSetMode = (newMode: AppMode) => {
     setMode(newMode);
+    localStorage.setItem('app_mode', newMode);
     if (newMode === 'production') {
-      // Clear manual token when switching to production
+      // Do not lose dev token, just stop using it in production
       setToken('');
+    } else if (newMode === 'dev') {
+      const saved = localStorage.getItem('gps_dev_token');
+      if (saved) setToken(saved);
     }
   };
 

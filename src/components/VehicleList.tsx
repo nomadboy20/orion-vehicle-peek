@@ -12,7 +12,7 @@ export function VehicleList() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingVehicles, setLoadingVehicles] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -99,14 +99,32 @@ export function VehicleList() {
     }
   }, [selectedGroup]);
 
+  if (!isTokenValid) {
+    return (
+      <div className="min-h-screen bg-gradient-surface">
+        <AppHeader />
+        <div className="flex items-center justify-center p-6">
+          <Card className="p-8 text-center max-w-md mx-auto bg-card/80 backdrop-blur-sm">
+            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+            <h2 className="text-xl font-semibold mb-2 text-card-foreground">Token nie je nastavený</h2>
+            <p className="text-muted-foreground">V dev režime vložte access token hore v hlavičke.</p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-surface flex items-center justify-center p-6">
-        <Card className="p-8 text-center max-w-md mx-auto bg-card/80 backdrop-blur-sm">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-          <h2 className="text-xl font-semibold mb-2 text-card-foreground">Načítám skupiny...</h2>
-          <p className="text-muted-foreground">Připojuji se k GPS Dozor API</p>
-        </Card>
+      <div className="min-h-screen bg-gradient-surface">
+        <AppHeader />
+        <div className="flex items-center justify-center p-6">
+          <Card className="p-8 text-center max-w-md mx-auto bg-card/80 backdrop-blur-sm">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+            <h2 className="text-xl font-semibold mb-2 text-card-foreground">Načítám skupiny...</h2>
+            <p className="text-muted-foreground">Připojuji se k GPS Dozor API</p>
+          </Card>
+        </div>
       </div>
     );
   }
