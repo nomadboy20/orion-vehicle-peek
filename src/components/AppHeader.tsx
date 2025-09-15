@@ -23,24 +23,14 @@ export function AppHeader() {
   };
 
   useEffect(() => {
-    // Check if we're in an iframe and if parent URL contains lovable.dev
-    const isInIframe = window !== window.parent;
-    let parentContainsLovable = false;
-    
-    if (isInIframe) {
-      try {
-        // Try to access parent location - this will throw SecurityError for cross-origin
-        const parentHref = window.parent.location.href;
-        parentContainsLovable = parentHref.includes('lovable.dev');
-      } catch (e) {
-        // If we can't access parent location due to CORS, assume it's not lovable.dev
-        parentContainsLovable = false;
-      }
-    }
-    
+    // Safe check: show header only when embedded in Lovable editor
+    const isInIframe = window.self !== window.top;
+    const referrer = document.referrer || '';
+    const parentContainsLovable = referrer.includes('lovable.dev');
+
     const shouldShow = isInIframe && parentContainsLovable;
     setShouldShowHeader(shouldShow);
-    
+
     // Set default mode based on environment
     if (shouldShow) {
       setMode('dev'); // Default to dev mode in lovable.dev iframe
