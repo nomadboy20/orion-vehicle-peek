@@ -11,10 +11,10 @@ interface Vehicle {
   speed: number;
   batteryPercentage: number;
   odometer: number;
-  lastPosition: {
+  lastPosition?: {
     latitudeE6: number;
     longitudeE6: number;
-  };
+  } | null;
   lastPositionTimestamp: string;
   refuelingCards: any[];
 }
@@ -75,10 +75,17 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <span className="font-mono">{vehicle.spz}</span>
               
-              <div className="flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-accent" />
-                <span>{(vehicle.lastPosition.latitudeE6 / 1000000).toFixed(4)}, {(vehicle.lastPosition.longitudeE6 / 1000000).toFixed(4)}</span>
-              </div>
+              {vehicle.lastPosition ? (
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-accent" />
+                  <span>{(vehicle.lastPosition.latitudeE6 / 1000000).toFixed(4)}, {(vehicle.lastPosition.longitudeE6 / 1000000).toFixed(4)}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-muted-foreground" />
+                  <span>Pozícia nedostupná</span>
+                </div>
+              )}
               
               {vehicle.batteryPercentage > 0 && (
                 <div className="flex items-center gap-1">
