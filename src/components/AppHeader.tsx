@@ -27,7 +27,7 @@ export function AppHeader() {
     const isInIframe = window !== window.parent;
     let parentContainsLovable = false;
     console.log('isInIframe',isInIframe)
-    console.log('a',window.parent.location)
+    console.log('a',window.parent.location.href)
     if (isInIframe) {
       try {
         parentContainsLovable = window.parent.location.href.includes('lovable.dev');
