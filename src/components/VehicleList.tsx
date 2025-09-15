@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { VehicleCard } from "./VehicleCard";
+import { AppHeader } from "./AppHeader";
 import { gpsService, type Vehicle, type Group } from "@/services/gpsService";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw, AlertCircle, Car, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useApp } from "@/contexts/AppContext";
 
 export function VehicleList() {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -15,8 +17,15 @@ export function VehicleList() {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
+  const { isTokenValid } = useApp();
 
   const fetchGroups = async () => {
+    if (!isTokenValid) {
+      setError("Token nie je nastavený");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -79,8 +88,10 @@ export function VehicleList() {
   };
 
   useEffect(() => {
-    fetchGroups();
-  }, []);
+    if (isTokenValid) {
+      fetchGroups();
+    }
+  }, [isTokenValid]);
 
   useEffect(() => {
     if (selectedGroup) {
@@ -117,6 +128,7 @@ export function VehicleList() {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
+      <AppHeader />
       <div className="flex">
         {/* Sidebar with groups */}
         <div className="w-80 bg-card/80 backdrop-blur-sm border-r border-border/50 min-h-screen p-6">
