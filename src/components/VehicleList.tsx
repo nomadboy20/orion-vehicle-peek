@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { VehicleCard } from "./VehicleCard";
 import { AppHeader } from "./AppHeader";
 import { gpsService, type Vehicle, type Group } from "@/services/gpsService";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCw, AlertCircle, Car, Building2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2, RefreshCw, AlertCircle, Car, Building2, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/contexts/AppContext";
 
@@ -16,8 +17,20 @@ export function VehicleList() {
   const [loadingVehicles, setLoadingVehicles] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const { isTokenValid } = useApp();
+
+  // Filter groups based on search query
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery.trim()) return groups;
+    
+    const query = searchQuery.toLowerCase();
+    return groups.filter(group => 
+      group.name.toLowerCase().includes(query) || 
+      group.code.toLowerCase().includes(query)
+    );
+  }, [groups, searchQuery]);
 
   const fetchGroups = async () => {
     if (!isTokenValid) {
@@ -157,14 +170,30 @@ export function VehicleList() {
             <h2 className="text-xl font-bold text-foreground">Skupiny</h2>
           </div>
 
+          {/* Search input */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Hľadať podľa názvu alebo kódu..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
           {groups.length === 0 ? (
             <Card className="p-6 text-center">
               <Building2 className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
               <p className="text-muted-foreground">Žádné skupiny k dispozici</p>
             </Card>
+          ) : filteredGroups.length === 0 ? (
+            <Card className="p-6 text-center">
+              <Search className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+              <p className="text-muted-foreground">Žiadne skupiny nevyhovujú hľadaniu</p>
+            </Card>
           ) : (
             <div className="space-y-2">
-              {groups.map((group) => (
+              {filteredGroups.map((group) => (
                 <Button
                   key={group.code}
                   variant={selectedGroup === group.code ? "default" : "ghost"}
