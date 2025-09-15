@@ -55,49 +55,49 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
   };
 
   return (
-    <Card className="p-6 hover:shadow-medium transition-all duration-300 hover:scale-[1.02] bg-gradient-surface border-border/50">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-gradient-primary text-primary-foreground">
+    <Card className="p-4 hover:shadow-medium transition-all duration-300 bg-gradient-surface border-border/50">
+      <div className="flex items-center justify-between">
+        {/* Left section - Vehicle info */}
+        <div className="flex items-center gap-4 flex-1">
+          <div className="p-2 rounded-lg bg-gradient-primary text-primary-foreground flex-shrink-0">
             <Car className="w-5 h-5" />
           </div>
-          <div>
-            <h3 className="font-semibold text-lg text-card-foreground">{vehicle.name}</h3>
-            <p className="text-sm text-muted-foreground font-mono">{vehicle.spz}</p>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-1">
+              <h3 className="font-semibold text-lg text-card-foreground truncate">{vehicle.name}</h3>
+              <Badge variant={getSpeedBadgeVariant(vehicle.speed)} className="flex items-center gap-1 flex-shrink-0">
+                <Gauge className="w-3 h-3" />
+                {vehicle.speed} km/h
+              </Badge>
+            </div>
+            
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <span className="font-mono">{vehicle.spz}</span>
+              
+              <div className="flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-accent" />
+                <span>{(vehicle.lastPosition.latitudeE6 / 1000000).toFixed(4)}, {(vehicle.lastPosition.longitudeE6 / 1000000).toFixed(4)}</span>
+              </div>
+              
+              {vehicle.batteryPercentage > 0 && (
+                <div className="flex items-center gap-1">
+                  <Battery className={`w-3 h-3 ${getBatteryColor(vehicle.batteryPercentage)}`} />
+                  <span>{vehicle.batteryPercentage}%</span>
+                </div>
+              )}
+              
+              <span className="text-xs">
+                {formatLastSeen(vehicle.lastPositionTimestamp)}
+              </span>
+              
+              {vehicle.branchName && (
+                <span className="text-xs truncate">
+                  {vehicle.branchName}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-        <Badge variant={getSpeedBadgeVariant(vehicle.speed)} className="flex items-center gap-1">
-          <Gauge className="w-3 h-3" />
-          {vehicle.speed} km/h
-        </Badge>
-      </div>
-
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm">
-          <MapPin className="w-4 h-4 text-accent" />
-          <span className="text-muted-foreground">
-            {(vehicle.lastPosition.latitudeE6 / 1000000).toFixed(4)}, {(vehicle.lastPosition.longitudeE6 / 1000000).toFixed(4)}
-          </span>
-        </div>
-
-        {vehicle.batteryPercentage > 0 && (
-          <div className="flex items-center gap-2 text-sm">
-            <Battery className={`w-4 h-4 ${getBatteryColor(vehicle.batteryPercentage)}`} />
-            <span className="text-muted-foreground">
-              Baterie: {vehicle.batteryPercentage}%
-            </span>
-          </div>
-        )}
-
-        <div className="pt-2 border-t border-border/50">
-          <p className="text-xs text-muted-foreground">
-            Poslední aktualizace: {formatLastSeen(vehicle.lastPositionTimestamp)}
-          </p>
-          {vehicle.branchName && (
-            <p className="text-xs text-muted-foreground">
-              Pobočka: {vehicle.branchName}
-            </p>
-          )}
         </div>
       </div>
     </Card>

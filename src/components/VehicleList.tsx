@@ -203,7 +203,7 @@ export function VehicleList() {
               </p>
             </Card>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="max-h-[calc(100vh-200px)] overflow-y-auto space-y-3 pr-2">
               {vehicles.map((vehicle) => (
                 <VehicleCard key={vehicle.code} vehicle={vehicle} />
               ))}
