@@ -35,7 +35,8 @@ export function AppHeader() {
     if (shouldShow) {
       setMode('dev'); // Default to dev mode in lovable.dev iframe
     } else {
-      setMode('production'); // Default to production mode otherwise
+      setMode('dev');
+     // setMode('production'); // Default to production mode otherwise
     }
   }, [setMode]);
 
