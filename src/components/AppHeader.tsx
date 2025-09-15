@@ -26,11 +26,12 @@ export function AppHeader() {
     // Check if we're in an iframe and if parent URL contains lovable.dev
     const isInIframe = window !== window.parent;
     let parentContainsLovable = false;
-    console.log('isInIframe',isInIframe)
-    console.log('a',window.parent.location.href)
+    
     if (isInIframe) {
       try {
-        parentContainsLovable = window.parent.location.href.includes('lovable.dev');
+        // Try to access parent location - this will throw SecurityError for cross-origin
+        const parentHref = window.parent.location.href;
+        parentContainsLovable = parentHref.includes('lovable.dev');
       } catch (e) {
         // If we can't access parent location due to CORS, assume it's not lovable.dev
         parentContainsLovable = false;
