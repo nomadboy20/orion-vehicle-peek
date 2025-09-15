@@ -85,10 +85,9 @@ export function AppHeader() {
             </Card>
           )}
 
-          {/* Production mode info */}
           {mode === 'production' && (
             <div className="text-sm text-muted-foreground">
-              Čakám na token z parent window...
+              {isTokenValid ? 'Token prijatý z parent window' : 'Čakám na token z parent window...'}
             </div>
           )}
         </div>
