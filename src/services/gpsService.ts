@@ -24,19 +24,17 @@ interface Vehicle {
 
 class GPSService {
   async getVehiclesByGroup(groupCode: string = 'SAGU'): Promise<Vehicle[]> {
-    console.log('🚀 Calling GPS API directly for group:', groupCode);
+    console.log('🚀 Calling GPS API with Orion auth');
     
     try {
-      const apiUrl = `https://a2.gpsguard.eu/api/v1/vehicles/group/${groupCode}`;
-      const username = "api_gpsdozor";
-      const password = "yakmwlARdn";
-      const auth = btoa(`${username}:${password}`);
+      const apiUrl = "https://api-d.gpsguard.eu/api/v1/groups";
+      const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJodHRwOi8vc2NoZW1hcy5vcmlvbi5ncHNndWFyZC5ldS93cy8yMDE1LzEwL2lkZW50aXR5L2NsYWltcy91c2VyaWQiOiIzMTciLCJuYW1laWQiOiJmdm9tYWNrYSIsInVuaXF1ZV9uYW1lIjoiZnZvbWFja2EiLCJodHRwOi8vc2NoZW1hcy5vcmlvbi5ncHNndWFyZC5ldS93cy8yMDE1LzEwL2lkZW50aXR5L2NsYWltcy91c2VyTGV2ZWwiOiJDbGllbnRVc2VyIiwiaHR0cDovL3NjaGVtYXMub3Jpb24uZ3BzZ3VhcmQuZXUvd3MvMjAxNS8xMC9pZGVudGl0eS9jbGFpbXMvcGVybWlzc2lvbk1hc2siOiIxNzYzMzIwMjg2IiwiaHR0cDovL3NjaGVtYXMub3Jpb24uZ3BzZ3VhcmQuZXUvd3MvMjAxNS8xMC9pZGVudGl0eS9jbGFpbXMvZGlzdHJpYnV0b3IiOiJHUFMiLCJodHRwOi8vc2NoZW1hcy5vcmlvbi5ncHNndWFyZC5ldS93cy8yMDE1LzEwL2lkZW50aXR5L2NsYWltcy9jbGllbnQiOiJNRVRSIiwiaHR0cDovL3NjaGVtYXMub3Jpb24uZ3BzZ3VhcmQuZXUvd3MvMjAxNS8xMC9pZGVudGl0eS9jbGFpbXMvdXNlclNoYXJlcyI6IiIsImh0dHA6Ly9zY2hlbWFzLm9yaW9uLmdwc2d1YXJkLmV1L3dzLzIwMTUvMTAvaWRlbnRpdHkvY2xhaW1zL2FjY2Vzc1J1bGVzIjoiW3tcImNjXCI6XCJNRVRSXCIsXCJyXCI6ZmFsc2UsXCJhdFwiOjB9XSIsImh0dHA6Ly9zY2hlbWFzLm9yaW9uLmdwc2d1YXJkLmV1L3dzLzIwMTUvMTAvaWRlbnRpdHkvY2xhaW1zL2Rpc3RyaWJ1dG9ycyI6IkdQUyIsImlzcyI6ImFzOklzc3VlciIsImF1ZCI6ImFzOkF1ZGllbmNlSWQiLCJleHAiOjE3NTc5MjA4MjMsIm5iZiI6MTc1NzkyMDUyM30.PT2GLWEpHS4zzKdHT4jjJatei3-pP0dU847Mh7If9_s";
 
       const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Basic ${auth}`,
-          'Accept': 'application/json',
+          'accept': '*/*',
+          'Authorization': `Orion ${token}`,
         },
       });
 
@@ -47,9 +45,11 @@ class GPSService {
       }
 
       const data = await response.json();
-      console.log('✅ GPS API success, vehicles count:', Array.isArray(data) ? data.length : 'not array');
+      console.log('✅ GPS API success, response:', data);
       
-      return data;
+      // Since we're calling /groups endpoint, we might need to extract vehicles from the response
+      // For now, return the data as is and see what structure we get
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('💥 GPS API error:', error);
       throw new Error(`Nepodařilo se načíst vozidla: ${error.message}`);
