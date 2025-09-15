@@ -144,15 +144,18 @@ export function VehicleList() {
 
   if (error && groups.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-surface flex items-center justify-center p-6">
-        <Card className="p-8 text-center max-w-md mx-auto bg-card/80 backdrop-blur-sm">
-          <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-          <h2 className="text-xl font-semibold mb-2 text-card-foreground">Chyba připojení</h2>
-          <p className="text-muted-foreground mb-4">{error}</p>
-          <Button onClick={() => fetchGroups()} className="bg-gradient-primary hover:opacity-90">
-            Zkusit znovu
-          </Button>
-        </Card>
+      <div className="min-h-screen bg-gradient-surface">
+        <AppHeader />
+        <div className="flex items-center justify-center p-6">
+          <Card className="p-8 text-center max-w-md mx-auto bg-card/80 backdrop-blur-sm">
+            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+            <h2 className="text-xl font-semibold mb-2 text-card-foreground">Chyba připojení</h2>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={() => fetchGroups()} className="bg-gradient-primary hover:opacity-90">
+              Zkusit znovu
+            </Button>
+          </Card>
+        </div>
       </div>
     );
   }
