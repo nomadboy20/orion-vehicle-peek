@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { useApp } from '@/contexts/AppContext';
 
 export function AppHeader() {
   const { mode, setMode, token, setToken, isTokenValid } = useApp();
+  const [shouldShowHeader, setShouldShowHeader] = useState(false);
   const [inputToken, setInputToken] = useState('');
 
   const handleTokenSubmit = () => {
@@ -20,6 +21,35 @@ export function AppHeader() {
   const handleModeToggle = () => {
     setMode(mode === 'dev' ? 'production' : 'dev');
   };
+
+  useEffect(() => {
+    // Check if we're in an iframe and if parent URL contains lovable.dev
+    const isInIframe = window !== window.parent;
+    let parentContainsLovable = false;
+    
+    if (isInIframe) {
+      try {
+        parentContainsLovable = window.parent.location.href.includes('lovable.dev');
+      } catch (e) {
+        // If we can't access parent location due to CORS, assume it's not lovable.dev
+        parentContainsLovable = false;
+      }
+    }
+    
+    const shouldShow = isInIframe && parentContainsLovable;
+    setShouldShowHeader(shouldShow);
+    
+    // Set default mode based on environment
+    if (shouldShow) {
+      setMode('dev'); // Default to dev mode in lovable.dev iframe
+    } else {
+      setMode('production'); // Default to production mode otherwise
+    }
+  }, [setMode]);
+
+  if (!shouldShowHeader) {
+    return null;
+  }
 
   return (
     <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 p-4">
