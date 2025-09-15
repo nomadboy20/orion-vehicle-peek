@@ -71,8 +71,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMode(newMode);
     localStorage.setItem('app_mode', newMode);
     if (newMode === 'production') {
-      // Do not lose dev token, just stop using it in production
-      setToken('');
+      // Avoid wiping a token received from parent; only clear if it's the dev token
+      const savedDev = localStorage.getItem('gps_dev_token');
+      if (token && savedDev && token === savedDev) {
+        setToken('');
+      }
     } else if (newMode === 'dev') {
       const saved = localStorage.getItem('gps_dev_token');
       if (saved) setToken(saved);

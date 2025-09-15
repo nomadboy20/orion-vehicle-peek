@@ -31,14 +31,12 @@ export function AppHeader() {
     const shouldShow = isInIframe && parentContainsLovable;
     setShouldShowHeader(shouldShow);
 
-    // Set default mode based on environment
-    if (shouldShow) {
-      setMode('dev'); // Default to dev mode in lovable.dev iframe
-    } else {
-     // setMode('dev');
-      setMode('production'); // Default to production mode otherwise
+    // Set default mode based on environment but avoid redundant resets
+    const desiredMode = shouldShow ? 'dev' : 'production';
+    if (mode !== desiredMode) {
+      setMode(desiredMode);
     }
-  }, [setMode]);
+  }, [mode, setMode]);
 
   if (!shouldShowHeader) {
     return null;
