@@ -110,6 +110,28 @@ class GPSService {
       if (timeoutId) clearTimeout(timeoutId);
     }
   }
+
+  async getAllVehicles(): Promise<Vehicle[]> {
+    console.log('🚀 Fetching all vehicles from GPS API');
+    
+    try {
+      // First get all groups
+      const groups = await this.getGroups();
+      
+      // Then fetch vehicles for each group and combine them
+      const allVehiclesPromises = groups.map(group => this.getVehiclesByGroup(group.code));
+      const vehicleArrays = await Promise.all(allVehiclesPromises);
+      
+      // Flatten the array of arrays into a single array
+      const allVehicles = vehicleArrays.flat();
+      
+      console.log(`✅ Fetched ${allVehicles.length} vehicles from ${groups.length} groups`);
+      return allVehicles;
+    } catch (error: any) {
+      console.error('💥 Get all vehicles error:', error);
+      throw new Error(`Nepodařilo se načíst všechna vozidla: ${error.message || error}`);
+    }
+  }
 }
 
 export const gpsService = new GPSService();
