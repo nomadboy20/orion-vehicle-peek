@@ -14,7 +14,7 @@ export function VehicleList() {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
-  const { isTokenValid, mode } = useApp();
+  const { isTokenValid, mode, token } = useApp();
 
   const fetchVehicles = async (isRefresh = false) => {
     if (!isTokenValid) {
@@ -60,6 +60,12 @@ export function VehicleList() {
     }
   }, [isTokenValid]);
 
+  // Auto-refresh when token is manually updated in dev mode
+  useEffect(() => {
+    if (mode === 'dev' && isTokenValid && token) {
+      fetchVehicles();
+    }
+  }, [token]);
   if (!isTokenValid) {
     return (
       <div className="min-h-screen bg-gradient-surface">
