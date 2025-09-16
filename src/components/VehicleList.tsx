@@ -103,6 +103,9 @@ export function VehicleList() {
   useEffect(() => {
     if (isTokenValid) {
       fetchGroups();
+      // Clear any previous selection when token changes
+      setSelectedGroup(null);
+      setVehicles([]);
     }
   }, [isTokenValid]);
 
