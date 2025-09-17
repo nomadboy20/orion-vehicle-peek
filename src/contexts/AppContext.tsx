@@ -55,6 +55,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [mode]);
 
+  // Listen for iframe data-group-code changes in production mode
+  useEffect(() => {
+    if (mode === 'production') {
+      function getGroupCode() {
+        const iframeElement = window.frameElement;
+        return iframeElement ? iframeElement.getAttribute("data-group-code") : null;
+      }
+
+      function onGroupCodeChange(newCode: string | null) {
+        console.log("🏷️ New groupCode:", newCode);
+        setSelectedGroup(newCode || '');
+      }
+
+      if (window.frameElement) {
+        const observer = new MutationObserver(() => {
+          const code = getGroupCode();
+          onGroupCodeChange(code);
+        });
+
+        observer.observe(window.frameElement, {
+          attributes: true,
+          attributeFilter: ["data-group-code"]
+        });
+
+        // Initialize with current value
+        onGroupCodeChange(getGroupCode());
+
+        return () => {
+          observer.disconnect();
+        };
+      }
+    }
+  }, [mode]);
+
   // Persist mode and restore dev token when switching back to dev
   useEffect(() => {
     localStorage.setItem('app_mode', mode);
