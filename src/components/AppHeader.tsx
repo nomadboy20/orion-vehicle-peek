@@ -3,13 +3,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Key, Globe, Code } from 'lucide-react';
+import { Combobox } from '@/components/ui/combobox';
+import { Settings, Key, Globe, Code, Users } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { gpsService, type Group } from '@/services/gpsService';
 
 export function AppHeader() {
-  const { mode, setMode, token, setToken, isTokenValid } = useApp();
+  const { mode, setMode, token, setToken, isTokenValid, selectedGroup, setSelectedGroup } = useApp();
   const [shouldShowHeader, setShouldShowHeader] = useState(false);
   const [inputToken, setInputToken] = useState('');
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loadingGroups, setLoadingGroups] = useState(false);
 
   const handleTokenSubmit = () => {
     if (inputToken.trim()) {
@@ -20,6 +24,21 @@ export function AppHeader() {
 
   const handleModeToggle = () => {
     setMode(mode === 'dev' ? 'production' : 'dev');
+  };
+
+  const fetchGroups = async () => {
+    if (!isTokenValid) return;
+    
+    setLoadingGroups(true);
+    try {
+      const fetchedGroups = await gpsService.getGroups();
+      setGroups(fetchedGroups);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+      setGroups([]);
+    } finally {
+      setLoadingGroups(false);
+    }
   };
 
   useEffect(() => {
@@ -37,6 +56,16 @@ export function AppHeader() {
       setMode(desiredMode);
     }
   }, [mode, setMode]);
+
+  // Fetch groups when token becomes valid
+  useEffect(() => {
+    if (isTokenValid) {
+      fetchGroups();
+    } else {
+      setGroups([]);
+      setSelectedGroup('');
+    }
+  }, [isTokenValid]);
 
   if (!shouldShowHeader) {
     return null;
@@ -82,6 +111,28 @@ export function AppHeader() {
               )}
             </Button>
           </div>
+
+          {/* Group Selector (only in dev mode) */}
+          {mode === 'dev' && isTokenValid && (
+            <Card className="p-3">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Skupina:</span>
+                <Combobox
+                  options={[
+                    { value: '', label: 'Všetky skupiny' },
+                    ...groups.map(group => ({ value: group.code, label: group.name }))
+                  ]}
+                  value={selectedGroup}
+                  onValueChange={setSelectedGroup}
+                  placeholder="Vyberte skupinu..."
+                  emptyText="Žiadne skupiny"
+                  className="w-48"
+                  disabled={loadingGroups}
+                />
+              </div>
+            </Card>
+          )}
 
           {/* Token Input (only in dev mode) */}
           {mode === 'dev' && (

@@ -14,7 +14,7 @@ export function VehicleList() {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
-  const { isTokenValid, mode, token } = useApp();
+  const { isTokenValid, mode, token, selectedGroup } = useApp();
 
   const fetchVehicles = async (isRefresh = false) => {
     if (!isTokenValid) {
@@ -31,7 +31,14 @@ export function VehicleList() {
       }
       setError(null);
 
-      const vehicleData = await gpsService.getAllVehicles();
+      let vehicleData: Vehicle[];
+      
+      if (selectedGroup) {
+        vehicleData = await gpsService.getVehiclesByGroup(selectedGroup);
+      } else {
+        vehicleData = await gpsService.getAllVehicles();
+      }
+      
       setVehicles(vehicleData);
       
       if (isRefresh) {
@@ -66,6 +73,13 @@ export function VehicleList() {
       fetchVehicles();
     }
   }, [token]);
+
+  // Refresh when selected group changes
+  useEffect(() => {
+    if (isTokenValid) {
+      fetchVehicles();
+    }
+  }, [selectedGroup]);
   if (!isTokenValid) {
     return (
       <div className="min-h-screen bg-gradient-surface">

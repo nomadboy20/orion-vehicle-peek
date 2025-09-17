@@ -9,6 +9,8 @@ interface AppContextType {
   token: string;
   setToken: (token: string) => void;
   isTokenValid: boolean;
+  selectedGroup: string;
+  setSelectedGroup: (group: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -23,6 +25,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
   const [isTokenValid, setIsTokenValid] = useState<boolean>(false);
   const [receivedFromParent, setReceivedFromParent] = useState<boolean>(false);
+  const [selectedGroup, setSelectedGroup] = useState<string>('');
 
   // Update GPS service token when token or mode changes
   useEffect(() => {
@@ -96,6 +99,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       token,
       setToken: handleSetToken,
       isTokenValid,
+      selectedGroup,
+      setSelectedGroup,
     }}>
       {children}
     </AppContext.Provider>
