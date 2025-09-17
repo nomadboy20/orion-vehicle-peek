@@ -23,8 +23,13 @@ export function AppHeader() {
   const [loadingGroups, setLoadingGroups] = useState(false);
   const handleTokenSubmit = () => {
     if (inputToken.trim()) {
+      console.log('🔄 Setting new token in dev mode');
       setToken(inputToken.trim());
       setInputToken('');
+      // Force refresh groups after token change
+      setTimeout(() => {
+        fetchGroups();
+      }, 100);
     }
   };
   const handleModeToggle = () => {
