@@ -60,12 +60,24 @@ export function AppHeader() {
   // Fetch groups when token becomes valid
   useEffect(() => {
     if (isTokenValid) {
-      fetchGroups();
+      fetchGroups().then(() => {
+        // Auto-select first group in dev mode if no group is selected
+        if (mode === 'dev' && !selectedGroup && groups.length > 0) {
+          setSelectedGroup(groups[0].code);
+        }
+      });
     } else {
       setGroups([]);
       setSelectedGroup('');
     }
   }, [isTokenValid, setSelectedGroup]);
+
+  // Auto-select first group when groups are loaded in dev mode
+  useEffect(() => {
+    if (mode === 'dev' && groups.length > 0 && !selectedGroup) {
+      setSelectedGroup(groups[0].code);
+    }
+  }, [groups, selectedGroup, setSelectedGroup, mode]);
 
   if (!shouldShowHeader) {
     return null;

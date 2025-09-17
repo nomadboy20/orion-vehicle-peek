@@ -33,10 +33,22 @@ export function VehicleList() {
 
       let vehicleData: Vehicle[];
       
-      if (selectedGroup) {
+      // In dev mode, always require a group selection
+      if (mode === 'dev') {
+        if (!selectedGroup) {
+          setError("Vyberte skupinu");
+          setLoading(false);
+          setRefreshing(false);
+          return;
+        }
         vehicleData = await gpsService.getVehiclesByGroup(selectedGroup);
       } else {
-        vehicleData = await gpsService.getAllVehicles();
+        // In production mode, load all vehicles if no group selected
+        if (selectedGroup) {
+          vehicleData = await gpsService.getVehiclesByGroup(selectedGroup);
+        } else {
+          vehicleData = await gpsService.getAllVehicles();
+        }
       }
       
       setVehicles(vehicleData);
@@ -62,10 +74,11 @@ export function VehicleList() {
   };
 
   useEffect(() => {
-    if (isTokenValid) {
+    // Only fetch vehicles when we have a valid token AND a selected group in dev mode
+    if (isTokenValid && (mode === 'production' || selectedGroup)) {
       fetchVehicles();
     }
-  }, [isTokenValid]);
+  }, [isTokenValid, mode, selectedGroup]);
 
   // Auto-refresh when token is manually updated in dev mode
   useEffect(() => {
@@ -74,12 +87,7 @@ export function VehicleList() {
     }
   }, [token]);
 
-  // Refresh when selected group changes
-  useEffect(() => {
-    if (isTokenValid) {
-      fetchVehicles();
-    }
-  }, [selectedGroup]);
+  // This effect is now handled in the main useEffect above
   if (!isTokenValid) {
     return (
       <div className="min-h-screen bg-gradient-surface">
