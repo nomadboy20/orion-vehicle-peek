@@ -65,7 +65,7 @@ export function AppHeader() {
       setGroups([]);
       setSelectedGroup('');
     }
-  }, [isTokenValid]);
+  }, [isTokenValid, setSelectedGroup]);
 
   if (!shouldShowHeader) {
     return null;
