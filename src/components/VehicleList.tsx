@@ -10,6 +10,7 @@ import { useApp } from "@/contexts/AppContext";
 
 export function VehicleList() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -72,6 +73,15 @@ export function VehicleList() {
       setRefreshing(false);
     }
   };
+
+  // Fetch groups for display purposes
+  useEffect(() => {
+    if (isTokenValid) {
+      gpsService.getGroups()
+        .then(setGroups)
+        .catch(() => setGroups([]));
+    }
+  }, [isTokenValid]);
 
   useEffect(() => {
     // Only fetch vehicles when we have a valid token AND a selected group in dev mode
@@ -156,7 +166,14 @@ export function VehicleList() {
               <Car className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">GPS Dozor Dashboard</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl font-bold text-foreground">GPS Dozor Dashboard</h1>
+                {selectedGroup && (
+                  <span className="text-lg text-muted-foreground">
+                    - {groups.find(g => g.code === selectedGroup)?.name || selectedGroup}
+                  </span>
+                )}
+              </div>
               <p className="text-muted-foreground">
                 {vehicles.length} vozidel celkom
               </p>
