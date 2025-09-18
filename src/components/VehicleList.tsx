@@ -34,23 +34,16 @@ export function VehicleList() {
 
       let vehicleData: Vehicle[];
       
-      // In dev mode, always require a group selection
-      if (mode === 'dev') {
-        if (!selectedGroup) {
-          setError("Vyberte skupinu");
-          setLoading(false);
-          setRefreshing(false);
-          return;
-        }
-        vehicleData = await gpsService.getVehiclesByGroup(selectedGroup);
-      } else {
-        // In production mode, load all vehicles if no group selected
-        if (selectedGroup) {
-          vehicleData = await gpsService.getVehiclesByGroup(selectedGroup);
-        } else {
-          vehicleData = await gpsService.getAllVehicles();
-        }
+      // Both dev and production mode now work the same way - require group selection
+      if (!selectedGroup) {
+        setError("Vyberte skupinu");
+        setLoading(false);
+        setRefreshing(false);
+        return;
       }
+      
+      console.log(`🎯 ${mode} mode: Fetching vehicles for group: ${selectedGroup}`);
+      vehicleData = await gpsService.getVehiclesByGroup(selectedGroup);
       
       setVehicles(vehicleData);
       
@@ -84,8 +77,8 @@ export function VehicleList() {
   }, [isTokenValid]);
 
   useEffect(() => {
-    // Only fetch vehicles when we have a valid token AND a selected group in dev mode
-    if (isTokenValid && (mode === 'production' || selectedGroup)) {
+    // Fetch vehicles when we have a valid token AND a selected group (both dev and production)
+    if (isTokenValid && selectedGroup) {
       fetchVehicles();
     }
   }, [isTokenValid, mode, selectedGroup]);
