@@ -44,17 +44,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (mode === 'production') {
       const handleMessage = (event: MessageEvent) => {
-        console.log('📨 Received message from parent:', event.data);
+        const data: any = event.data || {};
+        console.log('📨 Received message from parent:', data);
         
-        if (event.data && event.data.access_token) {
-          console.log('🔑 Received token from parent:', event.data.access_token);
-          setToken(event.data.access_token);
+        const accessToken = data.access_token || data.token || data?.payload?.access_token;
+        const groupCode = data.group_code || data.groupCode || data['data-group-code'] || data?.payload?.group_code || (data.type === 'set_group_code' ? data.value : undefined);
+
+        if (accessToken) {
+          console.log('🔑 Received token from parent:', accessToken);
+          setToken(accessToken);
           setReceivedFromParent(true);
         }
         
-        if (event.data && event.data.group_code) {
-          console.log('🏷️ Received group code from parent:', event.data.group_code);
-          setSelectedGroup(event.data.group_code);
+        if (typeof groupCode === 'string' && groupCode.length > 0) {
+          console.log('🏷️ Received group code from parent:', groupCode);
+          setSelectedGroup(groupCode);
         }
       };
 
@@ -62,7 +66,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       
       // Request initial data from parent
       console.log('📤 Requesting initial data from parent');
-      window.parent.postMessage({ type: 'request_data' }, '*');
+      try {
+        window.parent.postMessage({ type: 'lovable_iframe_ready' }, '*');
+        window.parent.postMessage({ type: 'request_data' }, '*');
+      } catch (e) {
+        console.warn('⚠️ Unable to postMessage to parent:', e);
+      }
       
       return () => {
         window.removeEventListener('message', handleMessage);

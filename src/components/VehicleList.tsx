@@ -100,8 +100,22 @@ export function VehicleList() {
             {mode === 'production' ? (
               <>
                 <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-                <h2 className="text-xl font-semibold mb-2 text-card-foreground">Čakám na token...</h2>
-                <p className="text-muted-foreground">Očakávam access token z parent okna</p>
+                {(!token) ? (
+                  <>
+                    <h2 className="text-xl font-semibold mb-2 text-card-foreground">Čakám na token...</h2>
+                    <p className="text-muted-foreground">Očakávam access token z parent okna</p>
+                  </>
+                ) : !selectedGroup ? (
+                  <>
+                    <h2 className="text-xl font-semibold mb-2 text-card-foreground">Čakám na skupinu...</h2>
+                    <p className="text-muted-foreground">Očakávam group code z parent okna</p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-xl font-semibold mb-2 text-card-foreground">Pripravujem dáta...</h2>
+                    <p className="text-muted-foreground">Prosím čakajte</p>
+                  </>
+                )}
               </>
             ) : (
               <>
