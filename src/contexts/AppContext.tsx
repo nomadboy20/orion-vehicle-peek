@@ -47,37 +47,58 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const data: any = event.data || {};
         console.log('📨 Received message from parent:', data);
         
-        const accessToken = data.access_token || data.token || data?.payload?.access_token;
-        const groupCode = data.group_code || data.groupCode || data['data-group-code'] || data?.payload?.group_code || (data.type === 'set_group_code' ? data.value : undefined);
-
-        if (accessToken) {
-          console.log('🔑 Received token from parent:', accessToken);
-          setToken(accessToken);
+        // Handle access_token response
+        if (data.access_token) {
+          console.log('🔑 Received access_token from parent:', data.access_token);
+          setToken(data.access_token);
           setReceivedFromParent(true);
         }
         
-        if (typeof groupCode === 'string' && groupCode.length > 0) {
-          console.log('🏷️ Received group code from parent:', groupCode);
-          setSelectedGroup(groupCode);
+        // Handle group_code response
+        if (data.group_code) {
+          console.log('🏷️ Received group_code from parent:', data.group_code);
+          setSelectedGroup(data.group_code);
         }
       };
 
       window.addEventListener('message', handleMessage);
       
-      // Request initial data from parent
-      console.log('📤 Requesting initial data from parent');
-      try {
-        window.parent.postMessage({ type: 'lovable_iframe_ready' }, '*');
-        window.parent.postMessage({ type: 'request_data' }, '*');
-      } catch (e) {
-        console.warn('⚠️ Unable to postMessage to parent:', e);
-      }
+      // Request access_token and group_code from parent
+      const requestDataFromParent = () => {
+        console.log('📤 Requesting access_token from parent');
+        try {
+          window.parent.postMessage({ type: 'request_access_token' }, '*');
+        } catch (e) {
+          console.warn('⚠️ Unable to request access_token:', e);
+        }
+        
+        console.log('📤 Requesting group_code from parent');
+        try {
+          window.parent.postMessage({ type: 'request_group_code' }, '*');
+        } catch (e) {
+          console.warn('⚠️ Unable to request group_code:', e);
+        }
+      };
+
+      // Initial request
+      requestDataFromParent();
+      
+      // Request data every 2 seconds until we have both token and group
+      const interval = setInterval(() => {
+        if (!token || !selectedGroup) {
+          console.log('🔄 Retrying requests for missing data...');
+          requestDataFromParent();
+        } else {
+          clearInterval(interval);
+        }
+      }, 2000);
       
       return () => {
         window.removeEventListener('message', handleMessage);
+        clearInterval(interval);
       };
     }
-  }, [mode]);
+  }, [mode, token, selectedGroup]);
 
   // Listen for iframe data-group-code changes in production mode
   useEffect(() => {
