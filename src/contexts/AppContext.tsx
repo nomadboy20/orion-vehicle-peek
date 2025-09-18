@@ -58,9 +58,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Listen for iframe data-group-code changes in production mode
   useEffect(() => {
     if (mode === 'production') {
+      console.log("🔍 Production mode: Setting up iframe observer");
+      
       function getGroupCode() {
         const iframeElement = window.frameElement;
-        return iframeElement ? iframeElement.getAttribute("data-group-code") : null;
+        console.log("🔍 Iframe element:", iframeElement);
+        const code = iframeElement ? iframeElement.getAttribute("data-group-code") : null;
+        console.log("🔍 Group code from iframe:", code);
+        return code;
       }
 
       function onGroupCodeChange(newCode: string | null) {
@@ -68,8 +73,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setSelectedGroup(newCode || '');
       }
 
+      console.log("🔍 Checking for frameElement:", window.frameElement);
+      
       if (window.frameElement) {
+        console.log("✅ Found frameElement, setting up observer");
         const observer = new MutationObserver(() => {
+          console.log("🔍 Iframe attribute changed, checking group code");
           const code = getGroupCode();
           onGroupCodeChange(code);
         });
@@ -80,11 +89,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
 
         // Initialize with current value
+        console.log("🔍 Initializing with current group code");
         onGroupCodeChange(getGroupCode());
 
         return () => {
+          console.log("🔍 Disconnecting iframe observer");
           observer.disconnect();
         };
+      } else {
+        console.log("❌ No frameElement found - not in iframe?");
       }
     }
   }, [mode]);
