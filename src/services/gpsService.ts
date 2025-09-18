@@ -35,6 +35,7 @@ class GPSService {
 
   async getGroups(): Promise<Group[]> {
     console.log('🚀 Fetching groups from GPS API');
+    console.log('🔑 Using token:', this.token ? `${this.token.substring(0, 20)}...` : 'NO TOKEN');
 
     let controller = new AbortController();
     let timeoutId: number | undefined;
@@ -50,6 +51,8 @@ class GPSService {
         },
         signal: controller.signal,
       });
+
+      console.log('📡 Response status:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorText = await response.text();
