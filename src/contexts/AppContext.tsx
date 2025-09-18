@@ -32,22 +32,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (token) {
       gpsService.setToken(token);
     }
-    const valid = mode === 'dev' ? Boolean(token) : Boolean(token && receivedFromParent);
+    // In production mode, we need both token and selectedGroup to be valid
+    const valid = mode === 'dev' 
+      ? Boolean(token) 
+      : Boolean(token && receivedFromParent && selectedGroup);
+    console.log('🔍 Token validation:', { mode, token: !!token, receivedFromParent, selectedGroup, valid });
     setIsTokenValid(valid);
-  }, [token, mode, receivedFromParent]);
+  }, [token, mode, receivedFromParent, selectedGroup]);
 
   // Listen for postMessage in production mode
   useEffect(() => {
     if (mode === 'production') {
       const handleMessage = (event: MessageEvent) => {
+        console.log('📨 Received message from parent:', event.data);
+        
         if (event.data && event.data.access_token) {
           console.log('🔑 Received token from parent:', event.data.access_token);
           setToken(event.data.access_token);
           setReceivedFromParent(true);
         }
+        
+        if (event.data && event.data.group_code) {
+          console.log('🏷️ Received group code from parent:', event.data.group_code);
+          setSelectedGroup(event.data.group_code);
+        }
       };
 
       window.addEventListener('message', handleMessage);
+      
+      // Request initial data from parent
+      console.log('📤 Requesting initial data from parent');
+      window.parent.postMessage({ type: 'request_data' }, '*');
       
       return () => {
         window.removeEventListener('message', handleMessage);
