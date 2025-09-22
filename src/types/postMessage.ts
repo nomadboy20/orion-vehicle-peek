@@ -43,6 +43,13 @@ export interface RequestGroupMessage extends BaseMessage {
   payload?: never;
 }
 
+export interface TokenRefreshMessage extends BaseMessage {
+  type: 'GPS_TOKEN_REFRESH';
+  payload: {
+    reason: '401_unauthorized';
+  };
+}
+
 export interface IframeReadyMessage extends BaseMessage {
   type: 'GPS_IFRAME_READY';
   payload?: {
@@ -92,6 +99,7 @@ export type ParentToIframeMessage =
 export type IframeToParentMessage = 
   | RequestTokenMessage
   | RequestGroupMessage
+  | TokenRefreshMessage
   | IframeReadyMessage
   | StatsUpdateMessage
   | ErrorMessage
@@ -120,6 +128,10 @@ export function isRequestGroupMessage(message: BaseMessage): message is RequestG
   return message.type === 'GPS_REQUEST_GROUP';
 }
 
+export function isTokenRefreshMessage(message: BaseMessage): message is TokenRefreshMessage {
+  return message.type === 'GPS_TOKEN_REFRESH';
+}
+
 export function isIframeReadyMessage(message: BaseMessage): message is IframeReadyMessage {
   return message.type === 'GPS_IFRAME_READY';
 }
@@ -145,6 +157,7 @@ export function isParentToIframeMessage(message: BaseMessage): message is Parent
 export function isIframeToParentMessage(message: BaseMessage): message is IframeToParentMessage {
   return isRequestTokenMessage(message) || 
          isRequestGroupMessage(message) ||
+         isTokenRefreshMessage(message) ||
          isIframeReadyMessage(message) ||
          isStatsUpdateMessage(message) ||
          isErrorMessage(message) ||
@@ -204,6 +217,15 @@ export function createRequestGroupMessage(): RequestGroupMessage {
   };
 }
 
+export function createTokenRefreshMessage(): TokenRefreshMessage {
+  return {
+    type: 'GPS_TOKEN_REFRESH',
+    payload: {
+      reason: '401_unauthorized',
+    },
+  };
+}
+
 export function createIframeReadyMessage(version?: string, capabilities?: string[]): IframeReadyMessage {
   return {
     type: 'GPS_IFRAME_READY',
@@ -257,6 +279,7 @@ export const MESSAGE_TYPES = {
   // Iframe to parent
   REQUEST_TOKEN: 'GPS_REQUEST_TOKEN' as const,
   REQUEST_GROUP: 'GPS_REQUEST_GROUP' as const,
+  TOKEN_REFRESH: 'GPS_TOKEN_REFRESH' as const,
   IFRAME_READY: 'GPS_IFRAME_READY' as const,
   STATS_UPDATE: 'GPS_STATS_UPDATE' as const,
   ERROR: 'GPS_ERROR' as const,
