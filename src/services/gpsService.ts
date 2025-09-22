@@ -37,6 +37,11 @@ class GPSService {
     return this.token;
   }
 
+  setMode(mode: 'dev' | 'production') {
+    // Update the apiClient mode
+    apiClient.setMode(mode);
+  }
+
   async getGroups(): Promise<Group[]> {
     try {
       const response = await apiClient.request<Group[]>({

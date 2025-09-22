@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { gpsService } from '@/services/gpsService';
+import { apiClient } from '@/services/apiClient';
 
 type AppMode = 'dev' | 'production';
 
@@ -34,6 +35,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (token) {
       gpsService.setToken(token);
     }
+    gpsService.setMode(mode);
     // In dev mode, only consider token valid if user explicitly set it
     // In production mode, we need both token and selectedGroup to be valid
     const valid = mode === 'dev' 

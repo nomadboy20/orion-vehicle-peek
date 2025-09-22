@@ -16,6 +16,7 @@ interface ApiResponse<T = any> {
 
 class ApiClient {
   private currentToken: string = '';
+  private currentMode: 'dev' | 'production' = 'production';
 
   setToken(token: string) {
     this.currentToken = token;
@@ -23,6 +24,14 @@ class ApiClient {
 
   getToken(): string {
     return this.currentToken;
+  }
+
+  setMode(mode: 'dev' | 'production') {
+    this.currentMode = mode;
+  }
+
+  getMode(): 'dev' | 'production' {
+    return this.currentMode;
   }
 
   private async waitForNewToken(maxWaitTime: number = 10000): Promise<string> {
@@ -77,10 +86,11 @@ class ApiClient {
     
     try {
       // Add authorization header if token exists
+      const authPrefix = this.currentMode === 'dev' ? 'Bearer' : 'Orion';
       const requestHeaders = {
         'accept': '*/*',
         ...headers,
-        ...(token && { 'Authorization': `Orion ${token}` }),
+        ...(token && { 'Authorization': `${authPrefix} ${token}` }),
       };
       
       const response = await fetch(url, {
