@@ -29,6 +29,8 @@ class GPSService {
 
   setToken(token: string) {
     this.token = token;
+    // Also update the apiClient token
+    apiClient.setToken(token);
   }
 
   getToken(): string {

@@ -15,19 +15,23 @@ interface ApiResponse<T = any> {
 }
 
 class ApiClient {
-  private getTokenFromGpsService(): string {
-    // Import dynamically to avoid circular dependency
-    const { gpsService } = require('./gpsService');
-    return gpsService.getToken();
+  private currentToken: string = '';
+
+  setToken(token: string) {
+    this.currentToken = token;
+  }
+
+  getToken(): string {
+    return this.currentToken;
   }
 
   private async waitForNewToken(maxWaitTime: number = 10000): Promise<string> {
     const startTime = Date.now();
-    const initialToken = this.getTokenFromGpsService();
+    const initialToken = this.currentToken;
     
     return new Promise((resolve, reject) => {
       const checkToken = () => {
-        const currentToken = this.getTokenFromGpsService();
+        const currentToken = this.currentToken;
         
         // If token changed from initial, we got a new one
         if (currentToken && currentToken !== initialToken) {
@@ -65,7 +69,7 @@ class ApiClient {
 
   async request<T = any>(config: RequestConfig, retryCount: number = 0): Promise<ApiResponse<T>> {
     const { url, method = 'GET', headers = {}, body, timeout = 12000 } = config;
-    const token = this.getTokenFromGpsService();
+    const token = this.currentToken;
     
     console.log(`🚀 API Request (attempt ${retryCount + 1}):`, { url, method, hasToken: !!token });
     
