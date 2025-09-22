@@ -67,14 +67,16 @@ export function VehicleList() {
     }
   };
 
-  // Fetch groups for display purposes
+  // Fetch groups for display purposes - only in dev mode
   useEffect(() => {
-    if (isTokenValid) {
+    if (isTokenValid && mode === 'dev') {
       gpsService.getGroups()
         .then(setGroups)
         .catch(() => setGroups([]));
+    } else {
+      setGroups([]);
     }
-  }, [isTokenValid]);
+  }, [isTokenValid, mode]);
 
   useEffect(() => {
     // Fetch vehicles when we have a valid token AND a selected group (both dev and production)

@@ -26,10 +26,12 @@ export function AppHeader() {
       console.log('🔄 Setting new token in dev mode');
       setToken(inputToken.trim());
       setInputToken('');
-      // Force refresh groups after token change
-      setTimeout(() => {
-        fetchGroups();
-      }, 100);
+      // Force refresh groups after token change (only in dev mode)
+      if (mode === 'dev') {
+        setTimeout(() => {
+          fetchGroups();
+        }, 100);
+      }
     }
   };
   const handleModeToggle = () => {
@@ -63,20 +65,24 @@ export function AppHeader() {
     }
   }, [mode, setMode]);
 
-  // Fetch groups when token becomes valid
+  // Fetch groups when token becomes valid - only in dev mode
   useEffect(() => {
-    if (isTokenValid) {
+    if (isTokenValid && mode === 'dev') {
       fetchGroups().then(() => {
         // Auto-select first group in dev mode if no group is selected
-        if (mode === 'dev' && !selectedGroup && groups.length > 0) {
+        if (!selectedGroup && groups.length > 0) {
           setSelectedGroup(groups[0].code);
         }
       });
     } else {
       setGroups([]);
-      setSelectedGroup('');
+      if (mode === 'production') {
+        // In production mode, don't clear selectedGroup as it comes from parent
+      } else {
+        setSelectedGroup('');
+      }
     }
-  }, [isTokenValid, setSelectedGroup]);
+  }, [isTokenValid, mode, setSelectedGroup]);
 
   // Auto-select first group when groups are loaded in dev mode
   useEffect(() => {
