@@ -1,4 +1,4 @@
-import { createTokenRefreshMessage } from '@/types/postMessage';
+import { createRequestTokenMessage } from '@/types/postMessage';
 
 interface RequestConfig {
   url: string;
@@ -58,9 +58,9 @@ class ApiClient {
     console.log('🔄 Requesting token refresh from parent');
     
     try {
-      // Send refresh message to parent
-      const refreshMessage = createTokenRefreshMessage();
-      window.parent.postMessage(refreshMessage, '*');
+      // Send request token message to parent (reusing existing message type)
+      const requestMessage = createRequestTokenMessage();
+      window.parent.postMessage(requestMessage, '*');
     } catch (error) {
       console.error('❌ Failed to request token refresh:', error);
       throw new Error('Unable to request token refresh from parent');
