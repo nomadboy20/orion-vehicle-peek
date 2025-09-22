@@ -8,6 +8,8 @@
 // Base message structure
 export interface BaseMessage {
   type: string;
+  source?: string;
+  timestamp?: number;
   payload?: any;
 }
 
@@ -61,17 +63,17 @@ export interface IframeReadyMessage extends BaseMessage {
 export interface StatsUpdateMessage extends BaseMessage {
   type: 'GPS_STATS_UPDATE';
   payload: {
-    activeVehicles: number;
-    lastUpdate: string; // ISO timestamp
-    status: 'online' | 'offline' | 'error' | 'loading';
-    errorMessage?: string;
+    vehicleCount: number;
+    groupCount: number;
+    lastUpdate: string;
+    status: 'online' | 'offline' | 'error';
   };
 }
 
 export interface ErrorMessage extends BaseMessage {
   type: 'GPS_ERROR';
   payload: {
-    error: string;
+    message: string;
     code?: string;
     details?: any;
   };
@@ -148,7 +150,7 @@ export function isLogMessage(message: BaseMessage): message is LogMessage {
   return message.type === 'GPS_LOG';
 }
 
-// Generic type guard for parent messages
+// Generic type guards
 export function isParentToIframeMessage(message: BaseMessage): message is ParentToIframeMessage {
   return isSetTokenMessage(message) || isSetGroupMessage(message);
 }
@@ -169,22 +171,21 @@ export function isIframeToParentMessage(message: BaseMessage): message is Iframe
 // =============================================================================
 
 export function validateSetTokenMessage(message: any): message is SetTokenMessage {
-  return message?.type === 'GPS_SET_TOKEN' &&
-         typeof message?.payload?.token === 'string' &&
-         message.payload.token.length > 0;
+  return message?.type === 'GPS_SET_TOKEN' && 
+         typeof message?.payload?.token === 'string';
 }
 
 export function validateSetGroupMessage(message: any): message is SetGroupMessage {
-  return message?.type === 'GPS_SET_GROUP' &&
-         typeof message?.payload?.groupCode === 'string' &&
-         message.payload.groupCode.length > 0;
+  return message?.type === 'GPS_SET_GROUP' && 
+         typeof message?.payload?.groupCode === 'string';
 }
 
 export function validateStatsUpdateMessage(message: any): message is StatsUpdateMessage {
-  return message?.type === 'GPS_STATS_UPDATE' &&
-         typeof message?.payload?.activeVehicles === 'number' &&
+  return message?.type === 'GPS_STATS_UPDATE' && 
+         typeof message?.payload?.vehicleCount === 'number' &&
+         typeof message?.payload?.groupCount === 'number' &&
          typeof message?.payload?.lastUpdate === 'string' &&
-         ['online', 'offline', 'error', 'loading'].includes(message?.payload?.status);
+         ['online', 'offline', 'error'].includes(message?.payload?.status);
 }
 
 // =============================================================================
@@ -207,19 +208,25 @@ export function createSetGroupMessage(groupCode: string): SetGroupMessage {
 
 export function createRequestTokenMessage(): RequestTokenMessage {
   return {
-    type: 'GPS_REQUEST_TOKEN'
+    type: 'GPS_REQUEST_TOKEN',
+    source: 'gps-iframe',
+    timestamp: Date.now(),
   };
 }
 
 export function createRequestGroupMessage(): RequestGroupMessage {
   return {
-    type: 'GPS_REQUEST_GROUP'
+    type: 'GPS_REQUEST_GROUP',
+    source: 'gps-iframe',
+    timestamp: Date.now(),
   };
 }
 
 export function createTokenRefreshMessage(): TokenRefreshMessage {
   return {
     type: 'GPS_TOKEN_REFRESH',
+    source: 'gps-iframe',
+    timestamp: Date.now(),
     payload: {
       reason: '401_unauthorized',
     },
@@ -229,30 +236,41 @@ export function createTokenRefreshMessage(): TokenRefreshMessage {
 export function createIframeReadyMessage(version?: string, capabilities?: string[]): IframeReadyMessage {
   return {
     type: 'GPS_IFRAME_READY',
-    payload: { version, capabilities }
+    source: 'gps-iframe',
+    timestamp: Date.now(),
+    payload: version || capabilities ? { version, capabilities } : undefined
   };
 }
 
 export function createStatsUpdateMessage(
-  activeVehicles: number, 
-  status: 'online' | 'offline' | 'error' | 'loading',
-  errorMessage?: string
+  vehicleCount: number,
+  groupCount: number,
+  lastUpdate: string,
+  status: 'online' | 'offline' | 'error'
 ): StatsUpdateMessage {
   return {
     type: 'GPS_STATS_UPDATE',
+    source: 'gps-iframe',
+    timestamp: Date.now(),
     payload: {
-      activeVehicles,
-      lastUpdate: new Date().toISOString(),
-      status,
-      errorMessage
+      vehicleCount,
+      groupCount,
+      lastUpdate,
+      status
     }
   };
 }
 
-export function createErrorMessage(error: string, code?: string, details?: any): ErrorMessage {
+export function createErrorMessage(message: string, code?: string, details?: any): ErrorMessage {
   return {
     type: 'GPS_ERROR',
-    payload: { error, code, details }
+    source: 'gps-iframe',
+    timestamp: Date.now(),
+    payload: {
+      message,
+      code,
+      details
+    }
   };
 }
 
@@ -263,7 +281,13 @@ export function createLogMessage(
 ): LogMessage {
   return {
     type: 'GPS_LOG',
-    payload: { level, message, data }
+    source: 'gps-iframe',
+    timestamp: Date.now(),
+    payload: {
+      level,
+      message,
+      data
+    }
   };
 }
 
@@ -297,5 +321,4 @@ export const STATS_STATUS = {
   ONLINE: 'online' as const,
   OFFLINE: 'offline' as const,
   ERROR: 'error' as const,
-  LOADING: 'loading' as const,
 } as const;

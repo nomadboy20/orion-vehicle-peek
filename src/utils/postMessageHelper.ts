@@ -61,13 +61,14 @@ export class PostMessageHelper {
     this.sendToParent({ type: 'GPS_REQUEST_GROUP' });
   }
 
-  sendStats(activeVehicles: number, status: 'online' | 'offline' | 'error' | 'loading') {
+  sendStats(vehicleCount: number, groupCount: number, status: 'online' | 'offline' | 'error' | 'loading') {
     this.sendToParent({
       type: 'GPS_STATS_UPDATE',
       payload: {
-        activeVehicles,
+        vehicleCount,
+        groupCount,
         lastUpdate: new Date().toISOString(),
-        status
+        status: status === 'loading' ? 'offline' : status,
       }
     });
   }
