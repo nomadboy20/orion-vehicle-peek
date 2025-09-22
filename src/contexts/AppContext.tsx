@@ -9,6 +9,7 @@ interface AppContextType {
   token: string;
   setToken: (token: string) => void;
   isTokenValid: boolean;
+  isUserToken: boolean; // True if user has explicitly set a token
   selectedGroup: string;
   setSelectedGroup: (group: string) => void;
 }
@@ -24,6 +25,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return savedToken || defaultToken;
   });
   const [isTokenValid, setIsTokenValid] = useState<boolean>(false);
+  const [isUserToken, setIsUserToken] = useState<boolean>(false); // Track if user explicitly set token
   const [receivedFromParent, setReceivedFromParent] = useState<boolean>(false);
   const [selectedGroup, setSelectedGroup] = useState<string>('');
 
@@ -32,13 +34,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (token) {
       gpsService.setToken(token);
     }
+    // In dev mode, only consider token valid if user explicitly set it
     // In production mode, we need both token and selectedGroup to be valid
     const valid = mode === 'dev' 
-      ? Boolean(token) 
+      ? Boolean(token && isUserToken) 
       : Boolean(token && receivedFromParent && selectedGroup);
-    console.log('🔍 Token validation:', { mode, token: !!token, receivedFromParent, selectedGroup, valid });
+    console.log('🔍 Token validation:', { mode, token: !!token, isUserToken, receivedFromParent, selectedGroup, valid });
     setIsTokenValid(valid);
-  }, [token, mode, receivedFromParent, selectedGroup]);
+  }, [token, mode, isUserToken, receivedFromParent, selectedGroup]);
 
   // Listen for postMessage in production mode
   useEffect(() => {
@@ -51,6 +54,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (data.access_token) {
           console.log('🔑 Received access_token from parent:', data.access_token);
           setToken(data.access_token);
+          setIsUserToken(true); // Token from parent is considered user token
           setReceivedFromParent(true);
         }
         
@@ -108,7 +112,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (mode === 'dev') {
       setReceivedFromParent(true);
       const saved = localStorage.getItem('gps_dev_token');
-      if (!token && saved) setToken(saved);
+      if (!token && saved) {
+        setToken(saved);
+        setIsUserToken(true); // Restored token is considered user token
+      }
     } else {
       setReceivedFromParent(false);
     }
@@ -116,6 +123,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const handleSetToken = (newToken: string) => {
     setToken(newToken);
+    setIsUserToken(true); // Mark as user-set token
     if (mode === 'dev') {
       localStorage.setItem('gps_dev_token', newToken);
       setReceivedFromParent(true);
@@ -146,6 +154,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       token,
       setToken: handleSetToken,
       isTokenValid,
+      isUserToken,
       selectedGroup,
       setSelectedGroup,
     }}>
