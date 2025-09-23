@@ -100,7 +100,7 @@ export function VehicleList() {
                       step.completed 
                         ? 'bg-primary text-primary-foreground shadow-soft' 
                         : step.current 
-                          ? 'bg-gradient-primary text-primary-foreground shadow-elegant animate-pulse' 
+                          ? 'bg-gradient-primary text-primary-foreground shadow-elegant' 
                           : 'bg-muted text-muted-foreground'
                     }`}
                   >
