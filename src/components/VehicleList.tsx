@@ -58,12 +58,20 @@ export function VehicleList() {
           <Card className="p-12 text-center bg-card/80 backdrop-blur-sm">
             <Car className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-xl font-semibold mb-2 text-card-foreground">GPS Dozor Template</h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-6">
               Šablóna je pripravená pre implementáciu GPS tracking funkcionalít.
             </p>
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground/80">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground/80 mb-6">
               <CheckCircle className="w-4 h-4" />
               <span>Skupina: {selectedGroup}</span>
+            </div>
+            
+            <div className="bg-gradient-primary/10 rounded-lg p-6 border border-primary/20">
+              <h3 className="text-lg font-semibold text-foreground mb-2">🚀 Smelo pokračuj s vibecodingom!</h3>
+              <p className="text-sm text-muted-foreground">
+                V produkčnom režime sa token a skupina načítajú automaticky z platformy Orion. 
+                Môžeš začať implementovať GPS tracking funkcionalitu bez obmedzení.
+              </p>
             </div>
           </Card>
         </div>
