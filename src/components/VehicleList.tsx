@@ -1,10 +1,37 @@
 import { AppHeader } from "./AppHeader";
 import { Card } from "@/components/ui/card";
-import { Car, Key, Users, CheckCircle } from "lucide-react";
+import { Car, Key, Users, CheckCircle, Loader2 } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
+import { gpsService, type Vehicle } from "@/services/gpsService";
+import { useEffect, useState } from "react";
+import { VehicleCard } from "./VehicleCard";
+import { toast } from "sonner";
 
 export function VehicleList() {
   const { mode, token, isUserToken, selectedGroup } = useApp();
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Load vehicles when group is selected
+  useEffect(() => {
+    const loadVehicles = async () => {
+      if (!selectedGroup || !token) return;
+      
+      setLoading(true);
+      try {
+        const data = await gpsService.getVehiclesByGroup(selectedGroup);
+        setVehicles(data);
+        console.log(`✅ Loaded ${data.length} vehicles for group ${selectedGroup}`);
+      } catch (error: any) {
+        console.error('Error loading vehicles:', error);
+        toast.error(`Nepodarilo sa načítať vozidlá: ${error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadVehicles();
+  }, [selectedGroup, token]);
 
   const renderDevModeContent = () => {
     const hasToken = token && isUserToken;
@@ -55,25 +82,26 @@ export function VehicleList() {
             </div>
           </div>
 
-          <Card className="p-12 text-center bg-card/80 backdrop-blur-sm">
-            <Car className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-xl font-semibold mb-2 text-card-foreground">GPS Dozor Template</h2>
-            <p className="text-muted-foreground mb-6">
-              Šablóna je pripravená pre implementáciu GPS tracking funkcionalít.
-            </p>
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground/80 mb-6">
-              <CheckCircle className="w-4 h-4" />
-              <span>Skupina: {selectedGroup}</span>
-            </div>
-            
-            <div className="bg-gradient-primary/10 rounded-lg p-6 border border-primary/20">
-              <h3 className="text-lg font-semibold text-foreground mb-2">🚀 Smelo pokračuj s vibecodingom!</h3>
-              <p className="text-sm text-muted-foreground">
-                V produkčnom režime sa token a skupina načítajú automaticky z platformy Orion. 
-                Môžeš začať implementovať GPS tracking funkcionalitu bez obmedzení.
-              </p>
-            </div>
-          </Card>
+            {loading ? (
+              <Card className="p-12 text-center bg-card/80 backdrop-blur-sm">
+                <Loader2 className="w-12 h-12 mx-auto mb-4 text-primary animate-spin" />
+                <p className="text-muted-foreground">Načítavam vozidlá...</p>
+              </Card>
+            ) : vehicles.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {vehicles.map((vehicle) => (
+                  <VehicleCard key={vehicle.code} vehicle={vehicle} />
+                ))}
+              </div>
+            ) : (
+              <Card className="p-12 text-center bg-card/80 backdrop-blur-sm">
+                <Car className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                <h2 className="text-xl font-semibold mb-2 text-card-foreground">Žiadne vozidlá</h2>
+                <p className="text-muted-foreground mb-6">
+                  Pre skupinu {selectedGroup} neboli nájdené žiadne vozidlá.
+                </p>
+              </Card>
+            )}
         </div>
       );
     }
@@ -175,13 +203,26 @@ export function VehicleList() {
               </div>
             </div>
 
-            <Card className="p-12 text-center bg-card/80 backdrop-blur-sm">
-              <Car className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-xl font-semibold mb-2 text-card-foreground">GPS Dozor Template</h2>
-              <p className="text-muted-foreground">
-                Šablóna je pripravená pre implementáciu GPS tracking funkcionalít.
-              </p>
-            </Card>
+            {loading ? (
+              <Card className="p-12 text-center bg-card/80 backdrop-blur-sm">
+                <Loader2 className="w-12 h-12 mx-auto mb-4 text-primary animate-spin" />
+                <p className="text-muted-foreground">Načítavam vozidlá...</p>
+              </Card>
+            ) : vehicles.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {vehicles.map((vehicle) => (
+                  <VehicleCard key={vehicle.code} vehicle={vehicle} />
+                ))}
+              </div>
+            ) : (
+              <Card className="p-12 text-center bg-card/80 backdrop-blur-sm">
+                <Car className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                <h2 className="text-xl font-semibold mb-2 text-card-foreground">Žiadne vozidlá</h2>
+                <p className="text-muted-foreground">
+                  Pre vybratú skupinu neboli nájdené žiadne vozidlá.
+                </p>
+              </Card>
+            )}
           </div>
         )}
       </div>
