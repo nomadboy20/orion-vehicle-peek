@@ -7,6 +7,21 @@ interface Group {
   name: string;
 }
 
+interface Position {
+  time: string;
+  speed: number;
+  latitudeE6: number;
+  longitudeE6: number;
+}
+
+interface VehicleHistory {
+  name: string;
+  vehicleCode: string;
+  fromUtc: string;
+  toUtc: string;
+  positions: Position[];
+}
+
 interface Vehicle {
   code: string;
   groupCode: string;
@@ -22,6 +37,7 @@ interface Vehicle {
   };
   lastPositionTimestamp: string;
   refuelingCards: any[];
+  recentPositions?: Position[];
 }
 
 class GPSService {
@@ -89,7 +105,42 @@ class GPSService {
       throw new Error(`Nepodařilo se načíst všechna vozidla: ${error.message || error}`);
     }
   }
+
+  async getVehicleHistory(vehicleCode: string, limit: number = 3): Promise<Position[]> {
+    try {
+      // Get last 24 hours of history
+      const toUtc = new Date();
+      const fromUtc = new Date(toUtc.getTime() - 24 * 60 * 60 * 1000);
+      
+      // Format dates to ISO 8601 without seconds (YYYY-MM-DDTHH:mm)
+      const formatDate = (date: Date) => {
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const hours = String(date.getUTCHours()).padStart(2, '0');
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      };
+
+      const response = await apiClient.request<VehicleHistory[]>({
+        url: `https://api-d.gpsguard.eu/v1/vehicles/${vehicleCode}/history?fromUtc=${formatDate(fromUtc)}&toUtc=${formatDate(toUtc)}`,
+        method: 'GET',
+      });
+      
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const history = response.data[0];
+        // Return last N positions
+        return history.positions.slice(-limit);
+      }
+      
+      return [];
+    } catch (error: any) {
+      console.error(`💥 Vehicle history API error for ${vehicleCode}:`, error);
+      // Don't throw, just return empty array
+      return [];
+    }
+  }
 }
 
 export const gpsService = new GPSService();
-export type { Vehicle, Group };
+export type { Vehicle, Group, Position };

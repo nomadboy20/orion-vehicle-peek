@@ -20,8 +20,17 @@ export function VehicleList() {
       setLoading(true);
       try {
         const data = await gpsService.getVehiclesByGroup(selectedGroup);
-        setVehicles(data);
-        console.log(`✅ Loaded ${data.length} vehicles for group ${selectedGroup}`);
+        
+        // Load last 3 positions for each vehicle
+        const vehiclesWithPositions = await Promise.all(
+          data.map(async (vehicle) => {
+            const positions = await gpsService.getVehicleHistory(vehicle.code, 3);
+            return { ...vehicle, recentPositions: positions };
+          })
+        );
+        
+        setVehicles(vehiclesWithPositions);
+        console.log(`✅ Loaded ${vehiclesWithPositions.length} vehicles for group ${selectedGroup}`);
       } catch (error: any) {
         console.error('Error loading vehicles:', error);
         toast.error(`Nepodarilo sa načítať vozidlá: ${error.message}`);

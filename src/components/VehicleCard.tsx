@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Car, MapPin, Battery, Gauge } from "lucide-react";
+import { Car, MapPin, Battery, Gauge, Clock } from "lucide-react";
+import type { Position } from "@/services/gpsService";
 
 interface Vehicle {
   code: string;
@@ -17,6 +18,7 @@ interface Vehicle {
   } | null;
   lastPositionTimestamp: string;
   refuelingCards: any[];
+  recentPositions?: Position[];
 }
 
 interface VehicleCardProps {
@@ -49,6 +51,19 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
       if (diffMins < 60) return `před ${diffMins} min`;
       if (diffMins < 1440) return `před ${Math.floor(diffMins / 60)} h`;
       return `před ${Math.floor(diffMins / 1440)} dny`;
+    } catch {
+      return "neznámo";
+    }
+  };
+
+  const formatDateTime = (timestamp: string) => {
+    try {
+      const date = new Date(timestamp);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      return `${day}.${month} ${hours}:${minutes}`;
     } catch {
       return "neznámo";
     }
@@ -107,6 +122,40 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
           </div>
         </div>
       </div>
+
+      {/* Recent positions section */}
+      {vehicle.recentPositions && vehicle.recentPositions.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-border/50">
+          <div className="flex items-center gap-2 mb-3">
+            <Clock className="w-4 h-4 text-muted-foreground" />
+            <h4 className="text-sm font-semibold text-muted-foreground">Posledné 3 pozície</h4>
+          </div>
+          <div className="space-y-2">
+            {vehicle.recentPositions.map((position, index) => (
+              <div 
+                key={index} 
+                className="flex items-center justify-between text-xs bg-muted/30 rounded-lg p-2"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-muted-foreground font-medium">
+                    {formatDateTime(position.time)}
+                  </span>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <MapPin className="w-3 h-3" />
+                    <span className="font-mono">
+                      {(position.latitudeE6 / 1000000).toFixed(5)}, {(position.longitudeE6 / 1000000).toFixed(5)}
+                    </span>
+                  </div>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  <Gauge className="w-3 h-3 mr-1" />
+                  {position.speed} km/h
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
