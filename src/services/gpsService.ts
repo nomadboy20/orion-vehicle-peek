@@ -45,7 +45,7 @@ class GPSService {
   async getGroups(): Promise<Group[]> {
     try {
       const response = await apiClient.request<Group[]>({
-        url: 'https://api-d.gpsguard.eu/groups',
+        url: 'https://api-d.gpsguard.eu/v1/groups',
         method: 'GET',
       });
       
@@ -59,7 +59,7 @@ class GPSService {
   async getVehiclesByGroup(groupCode: string): Promise<Vehicle[]> {
     try {
       const response = await apiClient.request<Vehicle[]>({
-        url: `https://api-d.gpsguard.eu/group/${groupCode}`,
+        url: `https://api-d.gpsguard.eu/v1/group/${groupCode}`,
         method: 'GET',
       });
       
