@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Car, MapPin, Battery, Gauge, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { Position } from "@/services/gpsService";
 
 interface Vehicle {
@@ -70,8 +71,9 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
   };
 
   return (
-    <Card className="p-4 hover:shadow-medium transition-all duration-300 bg-gradient-surface border-border/50">
-      <div className="flex items-center justify-between">
+    <Link to={`/vehicle/${vehicle.code}`}>
+      <Card className="p-4 hover:shadow-medium hover:scale-[1.02] transition-all duration-300 bg-gradient-surface border-border/50 cursor-pointer">
+        <div className="flex items-center justify-between">
         {/* Left section - Vehicle info */}
         <div className="flex items-center gap-4 flex-1">
           <div className="p-2 rounded-lg bg-gradient-primary text-primary-foreground flex-shrink-0">
@@ -156,6 +158,7 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
           </div>
         </div>
       )}
-    </Card>
+      </Card>
+    </Link>
   );
 }

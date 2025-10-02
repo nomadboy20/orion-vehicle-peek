@@ -106,6 +106,20 @@ class GPSService {
     }
   }
 
+  async getVehicle(vehicleCode: string): Promise<Vehicle> {
+    try {
+      const response = await apiClient.request<Vehicle>({
+        url: `https://api-d.gpsguard.eu/v1/vehicles/${vehicleCode}`,
+        method: 'GET',
+      });
+      
+      return response.data;
+    } catch (error: any) {
+      console.error(`💥 Vehicle API error for ${vehicleCode}:`, error);
+      throw new Error(`Nepodařilo se načíst vozidlo: ${error.message || error}`);
+    }
+  }
+
   async getVehicleHistory(vehicleCode: string, limit: number = 3): Promise<Position[]> {
     try {
       // Get last 24 hours of history
